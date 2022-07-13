@@ -9,9 +9,12 @@ function App() {
     const [currentUser, setCurrentUser] = useState({});
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [message, setMessage] = useState('');
 
     const getJobSources = async () => {
-        setJobSources((await axios.get(backend_base_url + '/job-sources')).data);
+        setJobSources(
+            (await axios.get(backend_base_url + '/job-sources')).data
+        );
     };
 
     const userIsLoggedIn = () => {
@@ -25,9 +28,20 @@ function App() {
     }, []);
 
     const handleLoginButton = async () => {
-        const _currentUser = (await axios.post(backend_base_url + '/login')).data;
-        getJobSources();
-        setCurrentUser(_currentUser);
+        const response = await fetch(backend_base_url + '/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+        setUsername('');
+        setPassword('');
+        if (response.ok) {
+            const data = await response.json();
+            getJobSources();
+            setCurrentUser(data.user);
+        } else {
+            setMessage('bad login');
+        }
     };
 
     return (
@@ -66,6 +80,7 @@ function App() {
                             Login
                         </button>
                     </div>
+                    <div>{message}</div>
                 </form>
             )}
         </div>
