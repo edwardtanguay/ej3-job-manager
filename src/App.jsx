@@ -39,6 +39,7 @@ function App() {
             const data = await response.json();
             getJobSources();
             setCurrentUser(data.user);
+            localStorage.setItem('token', data.token);
         } else {
             setMessage('bad login');
         }
