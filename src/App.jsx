@@ -22,9 +22,22 @@ function App() {
     };
 
     useEffect(() => {
-        if (userIsLoggedIn()) {
-            getJobSources();
-        }
+        (async () => {
+            const response = await fetch(backend_base_url + '/maintain-login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    authorization: 'Bearer ' + localStorage.getItem('token')
+                }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setCurrentUser(data.user);
+                getJobSources();
+            } else {
+                setCurrentUser({});
+            }
+        })();
     }, []);
 
     const handleLoginButton = async () => {
@@ -37,12 +50,17 @@ function App() {
         setPassword('');
         if (response.ok) {
             const data = await response.json();
-            getJobSources();
             setCurrentUser(data.user);
+            getJobSources();
             localStorage.setItem('token', data.token);
         } else {
             setMessage('bad login');
         }
+    };
+
+    const handleLogoutButton = () => {
+        localStorage.setItem('token', '');
+        setCurrentUser({});
     };
 
     return (
@@ -57,6 +75,9 @@ function App() {
                             return <li key={i}>{jobSource.name}</li>;
                         })}
                     </ul>
+                    <button className="logout" onClick={handleLogoutButton}>
+                        Logout
+                    </button>
                 </>
             ) : (
                 <form className="login">
