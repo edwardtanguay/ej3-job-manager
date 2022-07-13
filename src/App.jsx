@@ -2,16 +2,16 @@ import { useState, useEffect } from 'react';
 import './App.scss';
 import axios from 'axios';
 
-const backend_url =
-    import.meta.env.VITE_BACKEND_URL || 'http://localhost:3044/job-sources';
+const backend_base_url = 'http://localhost:3044';
 
-console.log(backend_url);
 function App() {
     const [jobSources, setJobSources] = useState([]);
     const [currentUser, setCurrentUser] = useState({});
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
 
     const getJobSources = async () => {
-        setJobSources((await axios.get(backend_url)).data);
+        setJobSources((await axios.get(backend_base_url + '/job-sources')).data);
     };
 
     const userIsLoggedIn = () => {
@@ -23,6 +23,12 @@ function App() {
             getJobSources();
         }
     }, []);
+
+    const handleLoginButton = async () => {
+        const _currentUser = (await axios.post(backend_base_url + '/login')).data;
+        getJobSources();
+        setCurrentUser(_currentUser);
+    };
 
     return (
         <div className="App">
@@ -39,7 +45,27 @@ function App() {
                 </>
             ) : (
                 <form className="login">
-                    <h2>Login...</h2>
+                    <div className="row">
+                        username:{' '}
+                        <input
+                            onChange={(e) => setUsername(e.target.value)}
+                            value={username}
+                            type="text"
+                        />
+                    </div>
+                    <div className="row">
+                        password:{' '}
+                        <input
+                            onChange={(e) => setPassword(e.target.value)}
+                            value={password}
+                            type="password"
+                        />
+                    </div>
+                    <div className="row">
+                        <button type="button" onClick={handleLoginButton}>
+                            Login
+                        </button>
+                    </div>
                 </form>
             )}
         </div>
